@@ -14,13 +14,12 @@ end
 
 @testset "Test 2D Gauss" begin
     for d = 1:5
-        npts = d*d
         Iref = (4.0, 0.0, 0.0, 0.0)
         for pxy = 1:4
             px = (pxy-1)%2
             py = div(pxy-1,2)
-            f(xi) = xi[1]^px * xi[2]^py * wt
-            I = sum(f(xi) * wt for (xi, wt) in GaussRule2d(npts))
+            f(xi) = xi[1]^px * xi[2]^py
+            I = sum(f(xi) * wt for (xi, wt) in GaussRule2d(d))
             @test I ≈ Iref[pxy]  atol=1e-12
         end
     end
