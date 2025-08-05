@@ -7,10 +7,7 @@ using Test
     Iref = 6.0/5.0 + 2.0/3.0 + 2.0
 
     for npts = 3:10
-        I = 0.0
-        for i = 1:npts
-            I += ptest(gauss_point(i, npts)) * gauss_weight(i, npts)
-        end
+        I = sum(ptest(xi) * wt for (xi, wt) in GaussRule1d(npts))
         @test I ≈ Iref  atol=1e-12
     end
 end
@@ -22,14 +19,8 @@ end
         for pxy = 1:4
             px = (pxy-1)%2
             py = div(pxy-1,2)
-
-            I = 0.0
-            for i = 1:npts
-                xi = gauss2d_point!(zeros(2), i, npts)
-                wt = gauss2d_weight(i, npts)
-                I += xi[1]^px * xi[2]^py * wt
-            end
-
+            f(xi) = xi[1]^px * xi[2]^py * wt
+            I = sum(f(xi) * wt for (xi, wt) in GaussRule2d(npts))
             @test I ≈ Iref[pxy]  atol=1e-12
         end
     end
@@ -40,13 +31,7 @@ end
     for pxy = 1:4
         px = (pxy-1)%2
         py = div(pxy-1,2)
-
-        I = 0.0
-        for i = 1:3
-            xi = hughes_point!(zeros(2), i, 3)
-            wt = hughes_weight(i, 3)
-            I += xi[1]^px * xi[2]^py * wt
-        end
+        I = sum(xi[1]^px * xi[2]^py * wt for (xi, wt) in HughesRule2d())
         @test I ≈ Iref[pxy]  atol=1e-12
     end
 end

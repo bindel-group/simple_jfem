@@ -158,6 +158,7 @@ function gauss_weight(i, npts)
     gauss_wts[( npts*(npts-1) )/2 + i]
 end
 
+
 function gauss2d_point!(xi, i, npts)
     d = isqrt(npts)
     ix, iy = ((i-1)%d)+1, div(i-1,d)+1
@@ -180,3 +181,42 @@ end
 function hughes_weight(i, npts)
     1.0/6
 end
+
+# -- Iterator interface for quadrature rules
+
+abstract type QuadratureRule end
+
+Base.iterate(q :: QuadratureRule, state=1) =
+    if state > quadrature_npoints(q)
+        nothing
+    else
+        ((quadrature_point(q, state), quadrature_weight(q, state)), state+1)
+    end
+
+struct GaussRule1d <: QuadratureRule
+    npts :: Integer
+end
+
+struct GaussRule2d <: QuadratureRule
+    xi :: Vector{Float64}
+    npts :: Integer
+end
+
+struct HughesRule2d <: QuadratureRule
+    xi :: Vector{Float64}
+end
+
+GaussRule2d(npts :: Integer) = GaussRule2d(zeros(2), npts)
+HughesRule2d() = HughesRule2d(zeros(2))
+
+quadrature_npoints(q :: GaussRule1d) = q.npts
+quadrature_point(q :: GaussRule1d, i) = gauss_point(i, q.npts)
+quadrature_weight(q :: GaussRule1d, i) = gauss_weight(i, q.npts)
+
+quadrature_npoints(q :: GaussRule2d) = q.npts
+quadrature_point(q :: GaussRule2d, i) = gauss2d_point!(q.xi, i, q.npts)
+quadrature_weight(q :: GaussRule2d, i) = gauss2d_weight(i, q.npts)
+
+quadrature_npoints(q :: HughesRule2d) = 3
+quadrature_point(q :: HughesRule2d, i) = hughes_point!(q.xi, i, 3)
+quadrature_weight(q :: HughesRule2d, i) = hughes_weight(i, 3)
