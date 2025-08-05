@@ -5,7 +5,6 @@ using Test
 @testset "Test 1D quadrature" begin
     ptest(xi) = ((((xi+3)*xi-1)*xi+1)*xi+1)*xi+1
     Iref = 6.0/5.0 + 2.0/3.0 + 2.0
-
     for npts = 3:10
         I = sum(ptest(xi) * wt for (xi, wt) in GaussRule1d(npts))
         @test I ≈ Iref  atol=1e-12
@@ -30,7 +29,8 @@ end
     for pxy = 1:4
         px = (pxy-1)%2
         py = div(pxy-1,2)
-        I = sum(xi[1]^px * xi[2]^py * wt for (xi, wt) in HughesRule2d())
+        f(xi) = xi[1]^px * xi[2]^py
+        I = sum(f(xi) * wt for (xi, wt) in HughesRule2d())
         @test I ≈ Iref[pxy]  atol=1e-12
     end
 end
