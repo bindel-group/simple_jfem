@@ -27,7 +27,7 @@ publish: docs/index.pdf docs/index.html
 	( cd docs ; quarto publish gh-pages index.qmd )
 
 test:
-	( for f in exe/test*.jl ; do julia $$f ; done )
+	( for f in test/test*.jl ; do julia $$f ; done )
 
 clean:
 	rm -f src/*~ test/*~ Makefile.bak
