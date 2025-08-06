@@ -1,15 +1,19 @@
 using LinearAlgebra
 using Printf
 
+# -- Mesh data structure
+
 struct Mesh{T}
-    shapes :: T
-    X   :: Matrix{Float64}
-    elt :: Matrix{Integer}
+    shapes :: T             # Shape function interface
+    X   :: Matrix{Float64}  # Node positions
+    elt :: Matrix{Integer}  # Connectivity
 end
 
 Mesh(shapes, numnp :: Integer, numelt :: Integer) =
     Mesh(shapes, zeros(dshapes(shapes), numnp),
          zeros(Integer, nshapes(shapes), numelt))
+
+# -- Block meshers
 
 function mesh_create1d(numelt, shapes, a=0.0, b=1.0)
     nen   = nshapes(shapes)
@@ -156,12 +160,14 @@ function mesh_block2d_T1(nex, ney)
     mesh
 end
 
+# -- Reference-to-spatial conversions
+
 function mesh_to_spatial!(mesh, eltid, x, J)
     s = mesh.shapes(x)
     e = view(mesh.elt,:,eltid)
     mul!(x, view(mesh.X,:,e), s.N, 1.0, 0.0)
     mul!(J, view(mesh.X,:,e), s.dN, 1.0, 0.0)
-    F = lu(J)
+    F = lu(J)  # NB: May want to do this in place
     rdiv!(s.dN, F)
     x, F, det(F)
     
@@ -172,6 +178,8 @@ function mesh_to_spatial(mesh, eltid, xref)
     J = zeros(d,d)
     mesh_to_spatial!(mesh, eltid, copy(xref), J)
 end
+
+# -- I/O
 
 function mesh_print_nodes(mesh)
     @printf("\nNodal Positions:\n")
