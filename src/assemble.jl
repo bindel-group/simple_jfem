@@ -4,6 +4,19 @@
 
 using SparseArrays
 
+# -- Vector assembly
+
+clear!(v :: Vector) = (v[:] .= 0)
+
+function assemble_add!(v :: Vector, evec, ids)
+    nids = length(ids)
+    for i = 1:nids
+        if ids[i] > 0
+            v[ids[i]] += evec[i]
+        end
+    end
+end
+
 # -- Dense matrix assembly
 
 clear!(A :: Matrix) = (A[:] .= 0)
