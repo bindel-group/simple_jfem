@@ -74,11 +74,11 @@ function assemble_add!(A :: SparseMatrixCSC, emat, ids)
     nids = length(ids)
     for j = 1:nids
         if ids[j] >= 0
-            
+
             # Start and end of col j in A and emat
             k, kn = A.colptr[ids[j]], A.colptr[ids[j]+1]-1
             i = 1
-            
+
             # Merge pass (skip any not in graph)
             while k <= kn && i <= nids
                 krow = A.rowval[k]
@@ -93,7 +93,7 @@ function assemble_add!(A :: SparseMatrixCSC, emat, ids)
                     i += 1
                 end
             end
-            
+
         end
     end
 end
