@@ -1,10 +1,13 @@
-mutable struct FEMProblem{T}
+mutable struct FEMProblem{T,S}
 
     # Mesh data
     mesh :: Mesh
 
     # Element type (NB: can generalize with multiple types)
     etype :: T
+
+    # Quadrature rule
+    qrule :: S
 
     # Storage for fields
     U  :: Matrix{Float64}  # Global soln values (ndof-by-numnp)
@@ -17,16 +20,16 @@ mutable struct FEMProblem{T}
 
 end
 
-function FEMProblem(mesh, etype, ndof)
+function FEMProblem(mesh, etype, qrule, ndof)
     numnp = size(mesh.X,2)
     nactive = numnp * ndof
     U = zeros(ndof, numnp)
     F = zeros(ndof, numnp)
     id = zeros(Integer, ndof, numnp)
-    FEMProblem(mesh, etype, U, F, id, ndof, nactive)
+    FEMProblem(mesh, etype, qrule, U, F, id, ndof, nactive)
 end
 
-function assign_ids(fe :: FEMProblem)
+function assign_ids!(fe :: FEMProblem)
     nactive = 0
     for j = 1:size(fe.mesh.X,2)
         for i = 1:fe.ndof
@@ -39,7 +42,7 @@ function assign_ids(fe :: FEMProblem)
     fe.nactive = nactive
 end
 
-function update_U(fe :: FEMProblem, du_red)
+function update_U!(fe :: FEMProblem, du_red)
     for j = 1:size(fe.mesh.X,2)
         for i = 1:fe.ndof
             if id[i,j] > 0
@@ -49,51 +52,29 @@ function update_U(fe :: FEMProblem, du_red)
     end
 end
 
-function set_load(fe :: FEMProblem, f :: Function)
+function set_load!(fe :: FEMProblem, f :: Function)
     for i = 1:size(fe.mesh.X,2)
         f(view(fe.mesh.X,:,i), view(fe.F,:,i))
     end
 end
 
-function assemble(fe :: FEMProblem, R :: Vector, K)
+function assemble!(fe :: FEMProblem, R :: Vector, K)
     nlocal = nshapes(mesh.shapes) * fe.ndof
     Re = zeros(nlocal)
     Ke = zeros(nlocal,nlocal)
     ids = zeros(Integer, nlocal)
     id[elt]
+    clear!(R)
+    clear!(K)
     for i = 1:size(fe.mesh.elt,2)
         ids[:] .= view(fe.id,:,view(elt,:,j))
-        element_dR(etype, fe, i, Re, Ke)
-        assemble(R, Re, ids)
-        assemble(K, Ke, ids)
+        Re[:] .= 0.0
+        Ke[:] .= 0.0
+        element_dR!(fe, i, Re, Ke)
+        assemble_add!(R, Re, ids)
+        assemble_add!(K, Ke, ids)
     end
     R, K
-end
-
-function assemble(fe :: FEMProblem, R :: Vector)
-    nlocal = nshapes(mesh.shapes) * fe.ndof
-    Re = zeros(nlocal)
-    ids = zeros(Integer, nlocal)
-    id[elt]
-    for i = 1:size(fe.mesh.elt,2)
-        ids[:] .= view(fe.id,:,view(elt,:,j))
-        element_dR(etype, fe, i, Re)
-        assemble(R, Re, ids)
-    end
-    R
-end
-
-function assemble(fe :: FEMProblem, K)
-    nlocal = nshapes(mesh.shapes) * fe.ndof
-    Ke = zeros(nlocal,nlocal)
-    ids = zeros(Integer, nlocal)
-    id[elt]
-    for i = 1:size(fe.mesh.elt,2)
-        ids[:] .= view(fe.id,:,view(elt,:,j))
-        element_dR(etype, fe, i, Ke)
-        assemble(K, Ke, ids)
-    end
-    K
 end
 
 function fem_print(fe :: FEMProblem)
