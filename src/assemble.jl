@@ -81,29 +81,42 @@ to_csc(a :: COOAssembler) = sparse(view(a.I, 1:a.nentries),
 
 # -- Assemble into exisiting CSC matrix
 
-clear!(A :: SparseMatrixCSC) = (A.nzval[:] .= 0.0)
+struct CSCAssembler{Tv,Ti}
+    A :: SparseMatrixCSC{Tv,Ti}
+    Aj :: Vector{Tv}
+end
 
-function assemble_add!(A :: SparseMatrixCSC, emat, ids)
+CSCAssembler(A :: SparseMatrixCSC{Tv,Ti}) where {Tv,Ti} =
+    CSCAssembler(A, zeros(Tv, A.m))
+
+function clear!(a :: CSCAssembler)
+    a.A.nzval[:] .= 0.0
+    a.Aj[:] .= 0.0
+end
+
+function assemble_add!(a :: CSCAssembler, emat, ids)
     nids = length(ids)
+    A, Aj = a.A, a.Aj
     for j = 1:nids
         if ids[j] >= 0
 
-            # Start and end of col j in A and emat
-            k, kn = A.colptr[ids[j]], A.colptr[ids[j]+1]-1
-            i = 1
+            # Populate dense column scratch
+            for i = 1:nids
+                if ids[i] >= 0
+                    Aj[ids[i]] += emat[i,j]
+                end
+            end
 
-            # Merge pass (skip any not in graph)
-            while k <= kn && i <= nids
-                krow = A.rowval[k]
-                irow = ids[i]
-                if irow < krow # Includes case irow <= 0 (BC)
-                    i += 1
-                elseif krow < irow
-                    k += 1
-                else
-                    A.nzval[k] += emat[i,j]
-                    k += 1
-                    i += 1
+            # Extract from dense column
+            k1, kn = A.colptr[ids[j]], A.colptr[ids[j]+1]-1
+            rows = view(A.rowval, k1:kn)
+            vals = view(A.nzval,  k1:kn)
+            vals[:] .+= view(Aj,rows)
+
+            # Clear dense columns scratch
+            for i = 1:nids
+                if ids[i] >= 0
+                    Aj[ids[i]] = 0.0
                 end
             end
 
