@@ -55,9 +55,46 @@ function set_load(fe :: FEMProblem, f :: Function)
     end
 end
 
-function assemble(fe :: FEMProblem, R, K)
+function assemble(fe :: FEMProblem, R :: Vector, K)
+    nlocal = nshapes(mesh.shapes) * fe.ndof
+    Re = zeros(nlocal)
+    Ke = zeros(nlocal,nlocal)
+    ids = zeros(Integer, nlocal)
+    id[elt]
+    for i = 1:size(fe.mesh.elt,2)
+        ids[:] .= view(fe.id,:,view(elt,:,j))
+        element_dR(etype, fe, i, Re, Ke)
+        assemble(R, Re, ids)
+        assemble(K, Ke, ids)
+    end
+    R, K
 end
 
+function assemble(fe :: FEMProblem, R :: Vector)
+    nlocal = nshapes(mesh.shapes) * fe.ndof
+    Re = zeros(nlocal)
+    ids = zeros(Integer, nlocal)
+    id[elt]
+    for i = 1:size(fe.mesh.elt,2)
+        ids[:] .= view(fe.id,:,view(elt,:,j))
+        element_dR(etype, fe, i, Re)
+        assemble(R, Re, ids)
+    end
+    R
+end
+
+function assemble(fe :: FEMProblem, K)
+    nlocal = nshapes(mesh.shapes) * fe.ndof
+    Ke = zeros(nlocal,nlocal)
+    ids = zeros(Integer, nlocal)
+    id[elt]
+    for i = 1:size(fe.mesh.elt,2)
+        ids[:] .= view(fe.id,:,view(elt,:,j))
+        element_dR(etype, fe, i, Ke)
+        assemble(K, Ke, ids)
+    end
+    K
+end
 
 function fem_print(fe :: FEMProblem)
     @printf("\nNodal information:\n")
