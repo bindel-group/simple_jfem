@@ -58,6 +58,12 @@ function set_load!(fe :: FEMProblem, f :: Function)
     end
 end
 
+function set_dirichlet!(fe :: FEMProblem, f :: Function)
+    for i = 1:size(fe.mesh.X,2)
+        f(view(fe.mesh.X,:,i), view(fe.id,:,i), view(fe.U,:,i))
+    end
+end
+
 function assemble!(fe :: FEMProblem, R :: Vector, K)
     nlocal = nshapes(fe.mesh.shapes) * fe.ndof
     Re = zeros(nlocal)
