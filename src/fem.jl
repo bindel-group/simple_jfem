@@ -33,9 +33,9 @@ function assign_ids!(fe :: FEMProblem)
     nactive = 0
     for j = 1:size(fe.mesh.X,2)
         for i = 1:fe.ndof
-            if id[i,j] >= 0
+            if fe.id[i,j] >= 0
                 nactive += 1
-                id[i] = nactive
+                fe.id[i,j] = nactive
             end
         end
     end
@@ -45,8 +45,8 @@ end
 function update_U!(fe :: FEMProblem, du_red)
     for j = 1:size(fe.mesh.X,2)
         for i = 1:fe.ndof
-            if id[i,j] > 0
-                U[i,j] -= du_red[id[i,j]]
+            if fe.id[i,j] > 0
+                fe.U[i,j] -= du_red[fe.id[i,j]]
             end
         end
     end
@@ -59,15 +59,14 @@ function set_load!(fe :: FEMProblem, f :: Function)
 end
 
 function assemble!(fe :: FEMProblem, R :: Vector, K)
-    nlocal = nshapes(mesh.shapes) * fe.ndof
+    nlocal = nshapes(fe.mesh.shapes) * fe.ndof
     Re = zeros(nlocal)
     Ke = zeros(nlocal,nlocal)
     ids = zeros(Integer, nlocal)
-    id[elt]
     clear!(R)
     clear!(K)
     for i = 1:size(fe.mesh.elt,2)
-        ids[:] .= view(fe.id,:,view(elt,:,j))
+        ids[:] .= reshape(view(fe.id,:,view(fe.mesh.elt,:,i)),:)
         Re[:] .= 0.0
         Ke[:] .= 0.0
         element_dR!(fe, i, Re, Ke)

@@ -178,6 +178,24 @@ quad_npoints(q :: GaussRule1d) = q.npts
 quad_point(q :: GaussRule1d, i) = gauss_point(i, q.npts)
 quad_weight(q :: GaussRule1d, i) = gauss_weight(i, q.npts)
 
+# -- 1D quadrature rule with vector storage
+
+struct GaussRule1dv <: QuadratureRule
+    xi :: Vector{Float64}
+    npts :: Integer
+end
+
+GaussRule1dv(npts :: Integer) = GaussRule1dv(zeros(1), npts)
+
+quad_npoints(q :: GaussRule1dv) = q.npts
+
+function quad_point(q :: GaussRule1dv, i)
+    q.xi[1] = gauss_point(i, q.npts)
+    q.xi
+end
+
+quad_weight(q :: GaussRule1dv, i) = gauss_weight(i, q.npts)
+
 # -- Tensor quadrature rule
 
 struct GaussRule2d <: QuadratureRule

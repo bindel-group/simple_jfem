@@ -170,7 +170,6 @@ function mesh_to_spatial!(mesh, eltid, x, J)
     F = lu(J)  # NB: May want to do this in place
     rdiv!(s.dN, F)
     x, F, det(F)
-    
 end
 
 function mesh_to_spatial(mesh, eltid, xref)
