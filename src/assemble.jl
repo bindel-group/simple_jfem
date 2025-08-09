@@ -113,17 +113,16 @@ end
 # it is better not to do so.
 
 mutable struct COOAssembler
-    I :: Vector{Integer}  # Row ids
-    J :: Vector{Integer}  # Column ids
+    I :: Vector{Int}      # Row ids
+    J :: Vector{Int}      # Column ids
     V :: Vector{Float64}  # Values
-    nentries :: Integer   # Number of entries saved
-    m :: Integer          # Rows in matrix
-    n :: Integer          # Columns in matrix
+    nentries :: Int       # Number of entries saved
+    m :: Int              # Rows in matrix
+    n :: Int              # Columns in matrix
 end
 
-COOAssembler(nalloc :: Integer, m, n=0) =
-    COOAssembler(zeros(Integer, nalloc),
-                 zeros(Integer, nalloc),
+COOAssembler(nalloc :: Int, m, n=0) =
+    COOAssembler(zeros(Int, nalloc), zeros(Int, nalloc),
                  zeros(nalloc), 0, m, n > 0 ? n : m)
 
 ##
@@ -146,6 +145,7 @@ function ensure_capacity!(assembler :: COOAssembler, ncontribs)
         resize!(assembler.J, nnew)
         resize!(assembler.V, nnew)
     end
+    assembler
 end
 
 ##

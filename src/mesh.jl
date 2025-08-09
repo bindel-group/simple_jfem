@@ -40,12 +40,12 @@ using Printf
 struct Mesh{T}
     shapes :: T             # Shape function interface
     X   :: Matrix{Float64}  # Node positions
-    elt :: Matrix{Integer}  # Connectivity
+    elt :: Matrix{Int}      # Connectivity
 end
 
 Mesh(shapes, numnp :: Integer, numelt :: Integer) =
     Mesh(shapes, zeros(dshapes(shapes), numnp),
-         zeros(Integer, nshapes(shapes), numelt))
+         zeros(Int, nshapes(shapes), numelt))
 
 ##
 # ## Block meshers

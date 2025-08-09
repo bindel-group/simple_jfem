@@ -233,7 +233,7 @@ Base.iterate(q :: QuadratureRule, state=1) =
 # `gauss_point` and `gauss_weight` functions defined earlier
 
 struct GaussRule1d <: QuadratureRule
-    npts :: Integer
+    npts :: Int
 end
 
 quad_npoints(q :: GaussRule1d) = q.npts
@@ -246,10 +246,10 @@ quad_weight(q :: GaussRule1d, i) = gauss_weight(i, q.npts)
 
 struct GaussRule1dv <: QuadratureRule
     xi :: Vector{Float64}
-    npts :: Integer
+    npts :: Int
 end
 
-GaussRule1dv(npts :: Integer) = GaussRule1dv(zeros(1), npts)
+GaussRule1dv(npts) = GaussRule1dv(zeros(1), npts)
 
 quad_npoints(q :: GaussRule1dv) = q.npts
 
@@ -269,10 +269,10 @@ quad_weight(q :: GaussRule1dv, i) = gauss_weight(i, q.npts)
 
 struct GaussRule2d <: QuadratureRule
     xi :: Vector{Float64}
-    npts1 :: Integer
+    npts1 :: Int
  end
 
-GaussRule2d(npts1 :: Integer) = GaussRule2d(zeros(2), npts1)
+GaussRule2d(npts1) = GaussRule2d(zeros(2), npts1)
 
 quad_npoints(q :: GaussRule2d) = q.npts1 * q.npts1
 

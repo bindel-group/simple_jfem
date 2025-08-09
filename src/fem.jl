@@ -39,11 +39,11 @@ mutable struct FEMProblem{T,S}
     # Storage for fields
     U  :: Matrix{Float64}  # Global soln values (ndof-by-numnp)
     F  :: Matrix{Float64}  # Global force values (ndof-by-numnp)
-    id :: Matrix{Integer}  # Global to reduced ID map (ndof-by-nump)
+    id :: Matrix{Int}      # Global to reduced ID map (ndof-by-nump)
 
     # Dimensions
-    ndof :: Integer
-    nactive :: Integer
+    ndof :: Int
+    nactive :: Int
 
 end
 
@@ -52,7 +52,7 @@ function FEMProblem(mesh, etype, qrule, ndof)
     nactive = numnp * ndof
     U = zeros(ndof, numnp)
     F = zeros(ndof, numnp)
-    id = zeros(Integer, ndof, numnp)
+    id = zeros(Int, ndof, numnp)
     FEMProblem(mesh, etype, qrule, U, F, id, ndof, nactive)
 end
 
@@ -130,7 +130,7 @@ function assemble!(fe :: FEMProblem, R :: Vector, K)
     nlocal = nshapes(fe.mesh.shapes) * fe.ndof
     Re = zeros(nlocal)
     Ke = zeros(nlocal,nlocal)
-    ids = zeros(Integer, nlocal)
+    ids = zeros(Int, nlocal)
     clear!(R)
     clear!(K)
     for i = 1:size(fe.mesh.elt,2)
