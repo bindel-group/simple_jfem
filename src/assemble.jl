@@ -1,7 +1,9 @@
 using SparseArrays
 
+#ldoc on
 ##
-# #
+# # Assembly
+#
 # Each element in a finite element discretization consists of
 #
 # - A domain $\Omega_e$ for the $e$th element, and
