@@ -32,7 +32,7 @@
 function gauss_point(i, npts)
     gauss_pts = (
         # ... the points
-#ldoc on
+#ldoc off
         # One point
         0.0,
 
@@ -107,7 +107,7 @@ function gauss_point(i, npts)
         0.679409568299024,
         0.865063366688985,
         0.973906528517172
-#ldoc off
+#ldoc on
       )
 
     gauss_pts[( npts*(npts-1) )/2 + i]

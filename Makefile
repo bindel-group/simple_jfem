@@ -3,16 +3,16 @@ LDOC= 	ldoc
 DOCS=	docs/quadrules.qmd \
 	docs/shapes.qmd \
 	docs/mesh.qmd \
-	docs/assemble.qmd
-#	docs/fem.qmd \
-#	docs/element.qmd 
+	docs/assemble.qmd \
+	docs/fem.qmd \
+	docs/element.qmd 
 
 .PHONY: all doc test clean
 
 all:
 
 docs/%.qmd: src/%.jl
-	$(LDOC) -highlight c -p quarto -o $@ $^
+	$(LDOC) -l sh -highlight julia -p quarto -o $@ $^
 
 docs/index.html: docs/index.qmd $(DOCS)
 	( cd docs ; quarto render index.qmd --to html )
