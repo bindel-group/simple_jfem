@@ -7,6 +7,8 @@ include("../src/element.jl")
 
 using Test
 
+@testset "2D FE test" begin
+
 # Set up mesh on [0,1]^2 with Dirichlet BC
 mesh = mesh_block2d_P1(2, 2)
 fe = FEMProblem(mesh, PoissonElt(), GaussRule2d(3), 1)
@@ -36,3 +38,5 @@ update_U!(fe, K\R)
 
 # Check vs reference solution
 @test fe.U[1,:] ≈ fe.mesh.X[1,:]
+
+end

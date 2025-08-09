@@ -49,9 +49,13 @@ function test_fem2(shapes, qrule)
     @test fe.U ≈ fe.mesh.X .* (1.0 .- fe.mesh.X) / 2
 end
 
-test_fem1(Shapes1dP1(), GaussRule1dv(2))
-test_fem1(Shapes1dP2(), GaussRule1dv(3))
-test_fem1(Shapes1dP3(), GaussRule1dv(4))
+@testset "Test 1D examples with linear field" begin
+    test_fem1(Shapes1dP1(), GaussRule1dv(2))
+    test_fem1(Shapes1dP2(), GaussRule1dv(3))
+    test_fem1(Shapes1dP3(), GaussRule1dv(4))
+end
 
-test_fem2(Shapes1dP2(), GaussRule1dv(3))
-test_fem2(Shapes1dP3(), GaussRule1dv(4))
+@testset "Test 1D examples with quadratic" begin
+    test_fem2(Shapes1dP2(), GaussRule1dv(3))
+    test_fem2(Shapes1dP3(), GaussRule1dv(4))
+end
