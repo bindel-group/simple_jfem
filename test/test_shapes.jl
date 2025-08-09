@@ -1,4 +1,8 @@
+using DispatchDoctor: @stable
+
+@stable begin
 include("../src/shapes.jl")
+end
 
 using Test
 using LinearAlgebra
@@ -21,7 +25,7 @@ function test_dshape(shapes, x0)
         xm[j] = x0[j]-h
         Np = copy(shapes(xp).N)
         Nm = copy(shapes(xm).N)
-        @test shapes(x0).dN[:,j] ≈ (Np-Nm)/(2h)  atol=1e-8
+        @test shapes(x0).dN[j,:] ≈ (Np-Nm)/(2h)  atol=1e-8
     end
 end
 

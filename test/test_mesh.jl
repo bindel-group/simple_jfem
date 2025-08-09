@@ -1,5 +1,9 @@
+using DispatchDoctor: @stable
+
+@stable begin
 include("../src/shapes.jl")
 include("../src/mesh.jl")
+end
 
 using Test
 
@@ -141,16 +145,18 @@ end
     xyref = [0.5; 1.0]
 
     # Trivial mapping
-    xy, F, detJ = mesh_to_spatial(mesh, 1, xyref)
+    xy, detJ = mesh_to_spatial(mesh, 1, xyref)
     @test xy == [0.75; 1.0]
-    @test F.factors == [0.5 0.0 ; 0.0 0.5]
+    @test detJ == 0.25
+    #@test F.factors == [0.5 0.0 ; 0.0 0.5]
 
     # More interesting mapping
     emap(x, y) = (3.0+2*x, 1.0+x+y)
     for i = 1:4
         mesh.X[:,i] .= emap(mesh.X[:,i]...)
     end
-    xy, F, detJ = mesh_to_spatial(mesh, 1, xyref)
+    xy, detJ = mesh_to_spatial(mesh, 1, xyref)
     @test xy == [4.5; 2.75]
-    @test F.factors == [1.0 0.0; 0.5 0.5]
+    @test detJ == 0.5
+    #@test F.factors == [1.0 0.0; 0.5 0.5]
 end

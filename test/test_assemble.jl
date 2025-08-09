@@ -1,4 +1,8 @@
+using DispatchDoctor: @stable
+
+@stable begin
 include("../src/assemble.jl")
+end
 
 using Test
 

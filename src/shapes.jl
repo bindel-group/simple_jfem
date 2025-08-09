@@ -8,7 +8,7 @@
 # at one nodal point in a reference domain and zero at the others.
 # We want to be able to compute both the values of all shape functions
 # at a point in the domain and also their derivatives (stored as
-# a matrix with $d$ columns for a $d$-dimensional reference domain).
+# a matrix with $d$ rows for a $d$-dimensional reference domain).
 #
 # ## 1D building blocks
 #
@@ -54,7 +54,7 @@ macro make_shape(classname, nfun, dim, body)
 
         # Default constructor
         $(esc(classname))() =
-            $(esc(classname))(zeros($nfun), zeros($nfun, $dim))
+            $(esc(classname))(zeros($nfun), zeros($dim, $nfun))
 
         # Get the number of shapes and dimension of the space
         $(esc(:nshapes))( :: $(esc(classname))) = $nfun
@@ -110,8 +110,10 @@ refnodes(:: Shapes1dP3) = [-1.0 -1.0/3 1.0/3 1.0]
     dNx1, dNx2 = dshapes1dP1(xx[1])
     dNy1, dNy2 = dshapes1dP1(xx[2])
     s.N[:]  .= ( Nx1* Ny1,  Nx2* Ny1,  Nx2* Ny2,  Nx1* Ny2)
-    s.dN[:] .= (dNx1* Ny1, dNx2* Ny1, dNx2* Ny2, dNx1* Ny2,
-                 Nx1*dNy1,  Nx2*dNy1,  Nx2*dNy2,  Nx1*dNy2)
+    s.dN[:] .= (dNx1* Ny1, Nx1*dNy1,
+                dNx2* Ny1, Nx2*dNy1,
+                dNx2* Ny2, Nx2*dNy2,
+                dNx1* Ny2, Nx1*dNy2)
 end
 refnodes(:: Shapes2dP1) =
     [-1.0   1.0   1.0  -1.0 ;
@@ -125,12 +127,15 @@ refnodes(:: Shapes2dP1) =
     s.N[:] .=  ( Nx1* Ny1,  Nx2* Ny1,  Nx3* Ny1,
                  Nx3* Ny2,  Nx3* Ny3,  Nx2* Ny3,
                  Nx1* Ny3,  Nx1* Ny2,  Nx2* Ny2)
-    s.dN[:] .= (dNx1* Ny1, dNx2* Ny1, dNx3* Ny1,
-                dNx3* Ny2, dNx3* Ny3, dNx2* Ny3,
-                dNx1* Ny3, dNx1* Ny2, dNx2* Ny2,
-                 Nx1*dNy1,  Nx2*dNy1,  Nx3*dNy1,
-                 Nx3*dNy2,  Nx3*dNy3,  Nx2*dNy3,
-                 Nx1*dNy3,  Nx1*dNy2,  Nx2*dNy2)
+    s.dN[:] .= (dNx1* Ny1, Nx1*dNy1,
+                dNx2* Ny1, Nx2*dNy1,
+                dNx3* Ny1, Nx3*dNy1,
+                dNx3* Ny2, Nx3*dNy2,
+                dNx3* Ny3, Nx3*dNy3,
+                dNx2* Ny3, Nx2*dNy3,
+                dNx1* Ny3, Nx1*dNy3,
+                dNx1* Ny2, Nx1*dNy2,
+                dNx2* Ny2, Nx2*dNy2)
 end
 refnodes(:: Shapes2dP2) =
     [-1.0   0.0   1.0   1.0   1.0   0.0  -1.0  -1.0   0.0 ;
@@ -145,12 +150,14 @@ refnodes(:: Shapes2dP2) =
     s.N[:] .=  ( Nx1* Ny1,  Nx2* Ny1,  Nx3* Ny1,
                  Nx3* Ny2,  Nx3* Ny3,  Nx2* Ny3,
                  Nx1* Ny3,  Nx1* Ny2)
-    s.dN[:] .= (dNx1* Ny1, dNx2* Ny1, dNx3* Ny1,
-                dNx3* Ny2, dNx3* Ny3, dNx2* Ny3,
-                dNx1* Ny3, dNx1* Ny2,
-                 Nx1*dNy1,  Nx2*dNy1,  Nx3*dNy1,
-                 Nx3*dNy2,  Nx3*dNy3,  Nx2*dNy3,
-                 Nx1*dNy3,  Nx1*dNy2)
+    s.dN[:] .= (dNx1* Ny1, Nx1*dNy1,
+                dNx2* Ny1, Nx2*dNy1,
+                dNx3* Ny1, Nx3*dNy1,
+                dNx3* Ny2, Nx3*dNy2,
+                dNx3* Ny3, Nx3*dNy3,
+                dNx2* Ny3, Nx2*dNy3,
+                dNx1* Ny3, Nx1*dNy3,
+                dNx1* Ny2, Nx1*dNy2)
 end
 refnodes(:: Shapes2dS2) =
     [-1.0   0.0   1.0   1.0   1.0   0.0  -1.0  -1.0   0.0 ;
@@ -164,8 +171,9 @@ refnodes(:: Shapes2dS2) =
 @make_shape Shapes2dT1 3 2 begin
     x, y = xx
     s.N[:]  .= (1.0-x-y, x, y)
-    s.dN[:] .= (-1.0, 1.0, 0.0,
-                -1.0, 0.0, 1.0)
+    s.dN[:] .= (-1.0, -1.0,
+                 1.0,  0.0,
+                 0.0,  1.0)
 end
 refnodes(:: Shapes2dT1) =
     [ 0.0 1.0 0.0 ;

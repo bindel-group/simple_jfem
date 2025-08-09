@@ -227,20 +227,28 @@ end
 # So we probably don't want to do very much dynamic allocation.  We
 # are not so careful about this now; this should perhaps be revisited.
 
-function mesh_to_spatial!(mesh, eltid, x, J)
+function mesh_to_spatial!(mesh, eltid, x, J, ipiv)
     s = mesh.shapes(x)
     e = view(mesh.elt,:,eltid)
     mul!(x, view(mesh.X,:,e), s.N, 1.0, 0.0)
-    mul!(J, view(mesh.X,:,e), s.dN, 1.0, 0.0)
-    F = lu(J)  # NB: May want to do this in place
-    rdiv!(s.dN, F)
-    x, F, det(F)
+    mul!(J, view(mesh.X,:,e), s.dN', 1.0, 0.0)
+    LAPACK.getrf!(J, ipiv)
+    LAPACK.getrs!('T', J, ipiv, s.dN)
+    detJ = 1.0
+    for k = 1:size(J,2)
+        detJ *= J[k,k]
+        if ipiv[k] != k
+            detJ = -detJ
+        end
+    end
+    x, detJ
 end
 
 function mesh_to_spatial(mesh, eltid, xref)
     d = dshapes(mesh.shapes)
     J = zeros(d,d)
-    mesh_to_spatial!(mesh, eltid, copy(xref), J)
+    ipiv = zeros(Int,d)
+    mesh_to_spatial!(mesh, eltid, copy(xref), J, ipiv)
 end
 
 ##

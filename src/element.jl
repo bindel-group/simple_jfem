@@ -65,11 +65,11 @@ function element_dR!(:: PoissonElt, fe :: FEMProblem, eltid, Re, Ke)
     s = fe.mesh.shapes
     eltj = view(fe.mesh.elt,:,eltid)
     for (xi,wt) in fe.qrule
-        x, f, detJ = mesh_to_spatial(fe.mesh, eltid, xi)
+        x, detJ = mesh_to_spatial(fe.mesh, eltid, xi)
         wt *= detJ
-        du = (view(fe.U,1,eltj)' * s.dN)'
+        du = s.dN * view(fe.U,1,eltj)
         fx =  view(fe.F,1,eltj)' * s.N
-        Re[:] += (s.dN*du - s.N*fx) * wt
-        mul!(Ke, s.dN, s.dN', wt, 1.0)
+        Re[:] += (s.dN'*du - s.N*fx) * wt
+        mul!(Ke, s.dN', s.dN, wt, 1.0)
     end
 end
