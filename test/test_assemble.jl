@@ -30,7 +30,6 @@ T5 = [ 2.0 -1.0  0.0  0.0  0.0 ;
     @test T5csc == T5
 
     T5re = build_tridiag(CSCAssembler(T5csc), 6)
-    display(T5re.A)
     @test T5re.A == T5
 
 end

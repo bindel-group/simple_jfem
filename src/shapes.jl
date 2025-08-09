@@ -1,4 +1,20 @@
-# -- 1D shapes and derivatives
+#ldoc on
+##
+# # Shape functions
+#
+# A *shape function* on a reference domain is a basis function used
+# for interpolation on that domain.  We will generally use Lagrange
+# shape functions (also called nodal shape functions), which are one
+# at one nodal point in a reference domain and zero at the others.
+# We want to be able to compute both the values of all shape functions
+# at a point in the domain and also their derivatives (stored as
+# a matrix with $d$ columns for a $d$-dimensional reference domain).
+#
+# ## 1D building blocks
+#
+# A useful building block is the Lagrange polynomials through 2, 3, or
+# 4 equispaced points, which span the linear (P1), quadratic (P2), and
+# cubic (P3) polynomial spaces on $[-1, 1]$, respectively.
 
 shapes1dP1(x) = (0.5*(1-x), 0.5*(1+x))
 dshapes1dP1(x) =(-0.5,      0.5)
@@ -20,21 +36,31 @@ function dshapes1dP3(x)
     1.0/16 * (-1+x*( 18+x* 27))
 end
 
-# -- Shape function class setup
+##
+# ## Shape class macro
+# 
+# We make a general structure type for accessing shape functions.  For
+# a given set of shapes, we keep some storage for the shape functions
+# (`N`) and their derivatives (`dN`).  Because we are defining the same
+# types of methods for each instance, we use Julia's macro facility to
+# help write the routines for us.
 
 macro make_shape(classname, nfun, dim, body)
     quote
         struct $(esc(classname))
-            N  :: Vector{Float64}
-            dN :: Matrix{Float64}
+            N  :: Vector{Float64}  # Shape functions (nshapes)
+            dN :: Matrix{Float64}  # Derivatives (nshapes-by-dshapes)
         end
 
+        # Default constructor
         $(esc(classname))() =
             $(esc(classname))(zeros($nfun), zeros($nfun, $dim))
 
+        # Get the number of shapes and dimension of the space
         $(esc(:nshapes))( :: $(esc(classname))) = $nfun
         $(esc(:dshapes))( :: $(esc(classname))) = $dim
 
+        # Routine for actual computation (looks like a call to the object)
         function (s :: $(esc(classname)))(xx)
             $body
             s
@@ -42,7 +68,13 @@ macro make_shape(classname, nfun, dim, body)
     end
 end
 
-# -- Shape function class definitions
+##
+# ## 1D shape functions
+#
+# The 1D shape function classes just call the Lagrange polynomial
+# support routines defined earlier.  For each, shape, we also define
+# a `refnodes` array with the list of reference-domain locations for
+# the nodes.
 
 @make_shape Shapes1dP1 2 1 begin
     x = xx[1]
@@ -64,6 +96,13 @@ refnodes(:: Shapes1dP2) = [-1.0 0.0 1.0]
     s.dN[:] .= dshapes1dP3(x)
 end
 refnodes(:: Shapes1dP3) = [-1.0 -1.0/3 1.0/3 1.0]
+
+##
+# ## 2D shape functions
+#
+# The P1 and P2 shapes are just tensor products of the 1D P1 and P2
+# shapes.  The serendipity element S2 is like the P2, but doesn't
+# keep the "bubble mode" shape function associated with the center node.
 
 @make_shape Shapes2dP1 4 2 begin
     Nx1,  Nx2  = shapes1dP1(xx[1])
@@ -116,6 +155,11 @@ end
 refnodes(:: Shapes2dS2) =
     [-1.0   0.0   1.0   1.0   1.0   0.0  -1.0  -1.0   0.0 ;
      -1.0  -1.0  -1.0   0.0   1.0   1.0   1.0   0.0   0.0 ]
+
+##
+# ## Triangle shapes
+#
+# For now, we only have linear shape functions on a triangle.
 
 @make_shape Shapes2dT1 3 2 begin
     x, y = xx

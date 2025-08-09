@@ -1,5 +1,38 @@
+#ldoc on
+##
+# # Quadrature rules
+#
+# Quadrature rules approximate integrals with formulas of the form
+# $$
+#   \int_{\Omega} f(x) \, d\Omega(x) \approx
+#   \sum_{j=1}^p f(\xi_{j}) w_j
+# $$
+# where $\xi_j \in \Omega$ and $w_j \in \mathbb{R}$ are known as the
+# quadrature nodes (or points) and weights, respectively.
+#
+# A good source of quadrature rules for various domains can be found
+# in Stroud's book on _Approximate calculation of multiple integrals_
+# (Prentice Hall, 1971).
+# 
+# ## Gaussian-Legendre quadrature rules
+# 
+# Gauss-Legendre quadrature rules (sometimes just called Gauss
+# quadrature rules when the context is clear) are $p$-point rules on
+# $[-1, 1]$ that are characterized by the fact that they are exact
+# when $f$ is a polynomial of degree at most $2p-1$.
+# 
+# Gauss-Legendre nodes are zeros of Legendre polynomials, while the
+# weights can be computed via an eigenvalue decomposition (using the
+# Golub-Welsch algorithm).  However, we do not need very high-order
+# quadrature rules, and so only provide nodes and weights for rules up
+# to $p = 10$ (probably more than we need), which are tabulated in
+# many places.  Because this is just a table lookup, we don't bother
+# to include the code in the automated documentation.
+
 function gauss_point(i, npts)
     gauss_pts = (
+        # ... the points
+#ldoc on
         # One point
         0.0,
 
@@ -73,13 +106,17 @@ function gauss_point(i, npts)
         0.433395394129247,
         0.679409568299024,
         0.865063366688985,
-        0.973906528517172)
+        0.973906528517172
+#ldoc off
+      )
 
     gauss_pts[( npts*(npts-1) )/2 + i]
 end
 
 function gauss_weight(i, npts)
     gauss_wts = (
+        # ... and the weights
+#ldoc off
         # One point
         2.0,
 
@@ -153,12 +190,33 @@ function gauss_weight(i, npts)
         0.269266719309996,
         0.219086362515982,
         0.149451349150581,
-        0.066671344308688)
+        0.066671344308688
+#ldoc on        
+    )
 
     gauss_wts[( npts*(npts-1) )/2 + i]
 end
 
-# -- Iterator interface for quadrature rules
+##
+# ## Quadrature iterator interface
+#
+# The `QuadratureRule` abstract type provides a base type for all quadrature
+# rules.  We assume that it provides methods
+#
+# - `quad_npoints(rule)`: Returns the number of points
+# - `quad_point(rule, i)`: Returns the quadrature point $\xi_i$
+# - `quad_weight(rule, i)`: Returns the quadrature weight $w_i$
+#
+# One can also provide a `quad_pointwt` that returns the point and weight
+# as a pair (by default, this just calls the individual `quad_point` and
+# `quad_weight` methods.
+#
+# For any quadrature rule, we overload the `Base.iterate` interface so that
+# we can use it in `for` loops, writing expressions like
+# ```{.julia}
+# I = sum( f(xi) * wt for (xi, wt) in rule )
+# ```
+# to approximate the integral via the rule.
 
 abstract type QuadratureRule end
 
@@ -168,7 +226,11 @@ quad_pointwt(q :: QuadratureRule, i) =
 Base.iterate(q :: QuadratureRule, state=1) =
     state > quad_npoints(q) ? nothing : (quad_pointwt(q, state), state+1)
 
- # -- 1D quadrature rule
+##
+# ## 1D Gauss quadrature interfaces
+# 
+# Our `GaussRule1d` rule just provides an alternate interface to the
+# `gauss_point` and `gauss_weight` functions defined earlier
 
 struct GaussRule1d <: QuadratureRule
     npts :: Integer
@@ -178,7 +240,9 @@ quad_npoints(q :: GaussRule1d) = q.npts
 quad_point(q :: GaussRule1d, i) = gauss_point(i, q.npts)
 quad_weight(q :: GaussRule1d, i) = gauss_weight(i, q.npts)
 
-# -- 1D quadrature rule with vector storage
+##
+# The `GaussRule1dv` rule returns the quadrature points in a vector of
+# length 1 (rather than returning them as scalars)
 
 struct GaussRule1dv <: QuadratureRule
     xi :: Vector{Float64}
@@ -196,7 +260,12 @@ end
 
 quad_weight(q :: GaussRule1dv, i) = gauss_weight(i, q.npts)
 
-# -- Tensor quadrature rule
+##
+# ## Product Gauss rules
+# 
+# A 2D tensor product Gauss rule for the domain $[-1,1]^2$ involves a
+# grid of `npts1`-by-`npts1` quadrature points with coordinates given
+# by 1D Gauss quadrature rules.
 
 struct GaussRule2d <: QuadratureRule
     xi :: Vector{Float64}
@@ -225,7 +294,12 @@ function quad_pointwt(q :: GaussRule2d, i)
     (q.xi, wt)
 end
 
-# -- Hughes quadrature rule
+##
+# ## Triangle mid-side rule
+# For a triangle, a rule based on the three mid-side values is exact
+# for every polynomial with total degree less than or equal to 2
+# (which is enough for our purposes).  This is sometimes called the
+# Hughes formula.
 
 struct HughesRule2d <: QuadratureRule
     xi :: Vector{Float64}

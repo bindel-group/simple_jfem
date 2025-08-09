@@ -9,7 +9,7 @@ using Test
 
 function setup_test_mesh(numelt, shapes, qrule, u0, u1)
     mesh = mesh_create1d(numelt, shapes)
-    fe = FEMProblem(mesh, Poisson1dElt(), qrule, 1)
+    fe = FEMProblem(mesh, PoissonElt(), qrule, 1)
     fe.id[1,1]   = -1
     fe.id[1,end] = -1
     fe.U[1,1]    = u0
