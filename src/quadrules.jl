@@ -200,19 +200,20 @@ end
 ##
 # ## Quadrature iterator interface
 #
-# The `QuadratureRule` abstract type provides a base type for all quadrature
-# rules.  We assume that it provides methods
+# The `QuadratureRule` abstract type provides a base type for all
+# quadrature rules.  We assume that it provides methods
 #
 # - `quad_npoints(rule)`: Returns the number of points
+# - `quad_dim(rule)`: Returns the dimension of the reference domain
 # - `quad_point(rule, i)`: Returns the quadrature point $\xi_i$
 # - `quad_weight(rule, i)`: Returns the quadrature weight $w_i$
 #
-# One can also provide a `quad_pointwt` that returns the point and weight
-# as a pair (by default, this just calls the individual `quad_point` and
-# `quad_weight` methods.
+# One can also provide a `quad_pointwt` that returns the point and
+# weight as a pair (by default, this just calls the individual
+# `quad_point` and `quad_weight` methods.
 #
-# For any quadrature rule, we overload the `Base.iterate` interface so that
-# we can use it in `for` loops, writing expressions like
+# For any quadrature rule, we overload the `Base.iterate` interface so
+# that we can use it in `for` loops, writing expressions like
 # ```{.julia}
 # I = sum( f(xi) * wt for (xi, wt) in rule )
 # ```
@@ -237,6 +238,7 @@ struct GaussRule1d <: QuadratureRule
 end
 
 quad_npoints(q :: GaussRule1d) = q.npts
+quad_dim(q :: GaussRule1d) = 1
 quad_point(q :: GaussRule1d, i) = gauss_point(i, q.npts)
 quad_weight(q :: GaussRule1d, i) = gauss_weight(i, q.npts)
 
@@ -252,6 +254,7 @@ end
 GaussRule1dv(npts) = GaussRule1dv(zeros(1), npts)
 
 quad_npoints(q :: GaussRule1dv) = q.npts
+quad_dim(q :: GaussRule1dv) = 1
 
 function quad_point(q :: GaussRule1dv, i)
     q.xi[1] = gauss_point(i, q.npts)
@@ -275,6 +278,7 @@ struct GaussRule2d <: QuadratureRule
 GaussRule2d(npts1) = GaussRule2d(zeros(2), npts1)
 
 quad_npoints(q :: GaussRule2d) = q.npts1 * q.npts1
+quad_dim(q :: GaussRule2d) = 2
 
 function quad_point(q :: GaussRule2d, i)
     ix, iy = ((i-1)%q.npts1)+1, div(i-1,q.npts1)+1
@@ -296,6 +300,7 @@ end
 
 ##
 # ## Triangle mid-side rule
+#
 # For a triangle, a rule based on the three mid-side values is exact
 # for every polynomial with total degree less than or equal to 2
 # (which is enough for our purposes).  This is sometimes called the
@@ -308,6 +313,7 @@ end
 HughesRule2d() = HughesRule2d(zeros(2))
 
 quad_npoints(q :: HughesRule2d) = 3
+quad_dim(q :: HughesRule2d) = 2
 quad_weight(q :: HughesRule2d, i) = 1.0/6
 
 function quad_point(q :: HughesRule2d, i)

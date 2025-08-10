@@ -45,9 +45,11 @@ end
 # types of methods for each instance, we use Julia's macro facility to
 # help write the routines for us.
 
+abstract type ShapeFuns end
+
 macro make_shape(classname, nfun, dim, body)
     quote
-        struct $(esc(classname))
+        struct $(esc(classname)) <: ShapeFuns
             N  :: Vector{Float64}  # Shape functions (nshapes)
             dN :: Matrix{Float64}  # Derivatives (nshapes-by-dshapes)
         end

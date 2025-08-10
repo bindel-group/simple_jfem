@@ -17,8 +17,9 @@ as a pedagogical example.  It largely mirrors the structure of an
 analogous C code (<https://github.com/bindel-group/simple_cfem>).
 
 {{< include shapes.qmd >}}
-{{< include mesh.qmd >}}
 {{< include quadrules.qmd >}}
+{{< include eltmap.qmd >}}
+{{< include mesh.qmd >}}
 {{< include assemble.qmd >}}
 {{< include fem.qmd >}}
 {{< include element.qmd >}}
