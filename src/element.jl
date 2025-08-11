@@ -65,10 +65,14 @@ function element_dR!(:: PoissonElt, fe :: FEMProblem, eltid, Re, Ke)
     s = fe.mesh.shapes
     eltj = view(fe.mesh.elt,:,eltid)
     X = view(fe.mesh.X,:,eltj)
+    U = view(fe.U,1,eltj)
+    F = view(fe.F,1,eltj)
+    du = zeros(dshapes(s))
     for (x,wt) in IsoMappedRule(fe.qrule, s, X, true)
-        du = s.dN * view(fe.U,1,eltj)
-        fx =  view(fe.F,1,eltj)' * s.N
-        Re[:] += (s.dN'*du - s.N*fx) * wt
+        fx =  F' * s.N
+        mul!(du, s.dN, U)
+        mul!(Re, s.dN', du,   wt, 1.0)
+        mul!(Re, s.N,   fx,  -wt, 1.0)
         mul!(Ke, s.dN', s.dN, wt, 1.0)
     end
 end
