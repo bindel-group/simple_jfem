@@ -8,34 +8,16 @@ using Printf
 # A mesh consists of an array of nodes locations $x_j \in
 # \mathbb{R}^d$ and an element connectivity array with `elt[i,j]`
 # giving the node number for the $i$th node of the $j$th element.
-#
 # Each element represents a subset of $\Omega_e \subset \mathbb{R}^d$
 # that is the image of a reference domain $\Omega_0 \subset
 # \mathbb{R}^d$ under a mapping
 # $$
 #   \chi(\xi) = \sum_{i=1}^{m} N^e_i(\xi) x_i
 # $$
-# where $x_1, \ldots, x_m$ are the $m$ element node positions.  The
-# functions $N^e_i$ are nodal basis functions (or Lagrange basis
-# functions, or cardinal functions) for an interpolation set $\xi_1,
-# \ldots, \xi_m \in \Omega_0$; that is $N_i(\xi_j) = \delta_{ij}$.
-# The reference domain nodes $\xi_i$ are typically placed at corners
-# or on edges of the reference domain, and their images are at
-# corresponding locations in $\Omega_e$.
-#
-# When the same set of nodal basis functions (also called nodal shape
-# functions in a finite element setting) are used both for defining
-# the geometry and for approximating a PDE solution on $\Omega$, we
-# call this method of describing the geometry an *isoparametric* map.
-#
-# We generally want our mappings describing the geometry to be
-# *positively oriented*: that is, the map $\chi$ should be invertible
-# and have positive Jacobian determinant over all of $\Omega_0$.
-# This puts some restrictions on the spatial positions of the nodes;
-# for example, if the interpolation nodes appear in counterclockwise
-# order in the reference domain $\Omega_0$, then the corresponding
-# spatial nodes in $\Omega_e$ should also appear in counterclockwise.
-# order.
+# where $x_1, \ldots, x_m$ are the $m$ element node positions
+# corresponding to reference domain points $\xi_1, \ldots, \xi_m$, and
+# the shape functions $N^e_i$ are Lagrange basis functions on the
+# reference domain.
     
 struct Mesh{T}
     shapes :: T             # Shape function interface

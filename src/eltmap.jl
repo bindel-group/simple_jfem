@@ -116,14 +116,28 @@ end
 # $$
 #   \chi(X) = \sum_{i=1}^m x_i N^e_i(X)
 # $$
-# where $x_i$ are given nodal locations.  In this case, the Jacobian of
-# the map is
+# where $x_i$ are given nodal locations and the functions $N^e_i$ are
+# nodal basis functions (or Lagrange basis functions, or cardinal
+# functions) for the interpolation set $\xi_1, \ldots, \xi_m \in
+# \Omega_0$; that is $N_i(\xi_j) = \delta_{ij}$.  In this case, the
+# Jacobian of the map is
 # $$
 #   \chi'(X) = \sum_{i=1}^m x_i {N^e_i}'(X).
 # $$
-# When the same shape functions are used for defining the domain mapping
-# and the interpolation of solution fields on the domain, we say we are
-# using an *iso-parametric* mapping.
+#
+# The reference domain nodes $\xi_i$ are typically placed at corners
+# or on edges of the reference domain, and their images are at the
+# corresponding locations in $\Omega_e$.  In order to ensure positive
+# orientation of $\chi$, the spatial nodes need to have the same type
+# of placement as the reference domain nodes.  For example, if the
+# interpolation nodes appear in counterclockwise order in the
+# reference domain, then they should also appear in counterclockwise
+# order in the spatial domain.
+#
+# When the same shape functions are used for defining the domain
+# mapping and the interpolation of solution fields on the domain, we
+# say we are using an *iso-parametric* mapping.
+
 
 function isoparametric!(shapes, xnodal, x, J)
     shapes(x)
