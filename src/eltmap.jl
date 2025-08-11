@@ -81,8 +81,8 @@ struct MappedRule{T,M} <: QuadratureRule where {T <: QuadratureRule}
     ipiv      :: Vector{Int}      # Pivots for Jacobian LU
 end
 
-MappedRule(base_rule, chi) =
-    MappedRule(base_rule, chi,
+MappedRule(base_rule, chi!) =
+    MappedRule(base_rule, chi!,
                zeros(quad_dim(base_rule), quad_dim(base_rule)),
                zeros(Int, quad_dim(base_rule)))
 
@@ -93,8 +93,8 @@ quad_dim(q :: MappedRule) = quad_dim(q.base_rule)
 
 function quad_point(q :: MappedRule, i)
     x = quad_point(q.base_rule, i)
-    chi!(x, q.J)
-    r2s_factor!(q.J, ipiv)
+    q.chi!(x, q.J)
+    r2s_factor!(q.J, q.ipiv)
     x
 end
 
