@@ -20,14 +20,21 @@ using Printf
 # reference domain.
     
 struct Mesh{T}
-    shapes :: T             # Shape function interface
-    X   :: Matrix{Float64}  # Node positions
-    elt :: Matrix{Int}      # Connectivity
+    shapes :: T              # Shape function interface
+    X    :: Matrix{Float64}  # Node positions
+    elt  :: Matrix{Int}      # Connectivity
+    J    :: Matrix{Float64}  # Storage for mapping Jacobian/LU
+    ipiv :: Vector{Int}      # Storage for Jacobian pivots
 end
 
-Mesh(shapes, numnp :: Integer, numelt :: Integer) =
-    Mesh(shapes, zeros(dshapes(shapes), numnp),
-         zeros(Int, nshapes(shapes), numelt))
+function Mesh(shapes, numnp :: Integer, numelt :: Integer)
+    n, d = nshapes(shapes), dshapes(shapes)
+    X    = zeros(d, numnp)
+    elt  = zeros(Int, n, numelt)
+    J    = zeros(d, d)
+    ipiv = zeros(Int, d)
+    Mesh(shapes, X, elt, J, ipiv)
+end
 
 ##
 # ## Block meshers

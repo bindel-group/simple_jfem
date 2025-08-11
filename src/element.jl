@@ -56,19 +56,23 @@ element_dR!(fe :: FEMProblem, eltid, Re, Ke) =
 # problem that it's easy to write dimension-independent code -- no
 # need for distinguishing 1D from 2D elements.
 #
-# NB: We are not particularly careful in the current code about
-# avoiding intermediate allocations.
+# Note: We are a little careful to avoid dynamic allocation inside
+# `element_dR!`, as this is called many times.
 
-struct PoissonElt end
+struct PoissonElt
+    du :: Vector{Float64}  # Workspace for element computations
+end
 
-function element_dR!(:: PoissonElt, fe :: FEMProblem, eltid, Re, Ke)
-    s = fe.mesh.shapes
+PoissonElt(d :: Integer) = PoissonElt(zeros(d))
+
+function element_dR!(e :: PoissonElt, fe :: FEMProblem, eltid, Re, Ke)
+    s, J, ipiv = fe.mesh.shapes, fe.mesh.J, fe.mesh.ipiv
     eltj = view(fe.mesh.elt,:,eltid)
     X = view(fe.mesh.X,:,eltj)
     U = view(fe.U,1,eltj)
     F = view(fe.F,1,eltj)
-    du = zeros(dshapes(s))
-    for (x,wt) in IsoMappedRule(fe.qrule, s, X, true)
+    du = e.du
+    for (x,wt) in IsoMappedRule(fe.qrule, s, X, true, J, ipiv)
         fx =  F' * s.N
         mul!(du, s.dN, U)
         mul!(Re, s.dN', du,   wt, 1.0)

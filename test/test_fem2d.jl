@@ -16,7 +16,7 @@ using Test
 
 # Set up mesh on [0,1]^2 with Dirichlet BC
 mesh = mesh_block2d_P1(2, 2)
-fe = FEMProblem(mesh, PoissonElt(), GaussRule2d(3), 1)
+fe = FEMProblem(mesh, PoissonElt(2), GaussRule2d(3), 1)
 
 # Move midpoint to off center (patch test)
 mesh.X[:,5] .= (0.6; 0.4)
