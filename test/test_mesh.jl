@@ -137,26 +137,6 @@ end
     check_mesh(mesh_block2d_P1(3,2), XrefP1, erefP1)
     check_mesh(mesh_block2d_P2(3,2), XrefP2, erefP2)
     check_mesh(mesh_block2d_S2(3,2), XrefS2, erefS2)
-    #check_mech(mesh_block2d_T1(3,2), XrefP1, erefT1)
+    check_mesh(mesh_block2d_T1(3,2), XrefP1, erefT1)
 end
 
-@testset "Test mapping" begin
-    mesh = mesh_block2d_P1(1,1)
-    xyref = [0.5; 1.0]
-
-    # Trivial mapping
-    xy, detJ = mesh_to_spatial(mesh, 1, xyref)
-    @test xy == [0.75; 1.0]
-    @test detJ == 0.25
-    #@test F.factors == [0.5 0.0 ; 0.0 0.5]
-
-    # More interesting mapping
-    emap(x, y) = (3.0+2*x, 1.0+x+y)
-    for i = 1:4
-        mesh.X[:,i] .= emap(mesh.X[:,i]...)
-    end
-    xy, detJ = mesh_to_spatial(mesh, 1, xyref)
-    @test xy == [4.5; 2.75]
-    @test detJ == 0.5
-    #@test F.factors == [1.0 0.0; 0.5 0.5]
-end

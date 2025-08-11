@@ -214,44 +214,6 @@ function mesh_block2d_T1(nex, ney)
 end
 
 ##
-# ## Reference-to-spatial conversions
-#
-# Given a mesh and a point in a reference geometry (given by an
-# element identifier `eltid` and coordinates `xref` in the element's
-# reference domain), we would like to be able to compute spatial
-# quantities (the shape functions, their spatial derivatives, and the
-# Jacobian of the reference to spatial map).  The Jacobian matrix
-# is in LU-factored form.
-#
-# NB: This gets used a lot -- at every mesh point and at every stage.
-# So we probably don't want to do very much dynamic allocation.  We
-# are not so careful about this now; this should perhaps be revisited.
-
-function mesh_to_spatial!(mesh, eltid, x, J, ipiv)
-    s = mesh.shapes(x)
-    e = view(mesh.elt,:,eltid)
-    mul!(x, view(mesh.X,:,e), s.N, 1.0, 0.0)
-    mul!(J, view(mesh.X,:,e), s.dN', 1.0, 0.0)
-    LAPACK.getrf!(J, ipiv)
-    LAPACK.getrs!('T', J, ipiv, s.dN)
-    detJ = 1.0
-    for k = 1:size(J,2)
-        detJ *= J[k,k]
-        if ipiv[k] != k
-            detJ = -detJ
-        end
-    end
-    x, detJ
-end
-
-function mesh_to_spatial(mesh, eltid, xref)
-    d = dshapes(mesh.shapes)
-    J = zeros(d,d)
-    ipiv = zeros(Int,d)
-    mesh_to_spatial!(mesh, eltid, copy(xref), J, ipiv)
-end
-
-##
 # ## Mesh output
 # 
 # For debugging, it is helpful to be able to print out all or part of
