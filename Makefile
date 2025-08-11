@@ -2,6 +2,7 @@ LDOC= 	ldoc
 
 DOCS=	docs/quadrules.qmd \
 	docs/shapes.qmd \
+	docs/eltmap.qmd \
 	docs/mesh.qmd \
 	docs/assemble.qmd \
 	docs/fem.qmd \

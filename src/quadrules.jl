@@ -282,13 +282,13 @@ quad_dim(q :: GaussRule2d) = 2
 
 function quad_point(q :: GaussRule2d, i)
     ix, iy = ((i-1)%q.npts1)+1, div(i-1,q.npts1)+1
-    q.xi[:] .= (gauss_point(ix, d), gauss_point(iy, d))
+    q.xi[:] .= (gauss_point(ix, q.npts1), gauss_point(iy, q.npts1))
     q.xi
 end
 
 function quad_weight(q :: GaussRule2d, i)
     ix, iy = ((i-1)%q.npts1)+1, div(i-1,q.npts1)+1
-    gauss_weight(ix, d) * gauss_weight(iy, d)
+    gauss_weight(ix, q.npts1) * gauss_weight(iy, q.npts1)
 end
 
 function quad_pointwt(q :: GaussRule2d, i)

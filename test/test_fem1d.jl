@@ -3,6 +3,7 @@ using DispatchDoctor: @stable
 @stable begin
 include("../src/quadrules.jl")
 include("../src/shapes.jl")
+include("../src/eltmap.jl")
 include("../src/mesh.jl")
 include("../src/assemble.jl")
 include("../src/fem.jl")

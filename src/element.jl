@@ -64,9 +64,8 @@ struct PoissonElt end
 function element_dR!(:: PoissonElt, fe :: FEMProblem, eltid, Re, Ke)
     s = fe.mesh.shapes
     eltj = view(fe.mesh.elt,:,eltid)
-    for (xi,wt) in fe.qrule
-        x, detJ = mesh_to_spatial(fe.mesh, eltid, xi)
-        wt *= detJ
+    X = view(fe.mesh.X,:,eltj)
+    for (x,wt) in IsoMappedRule(fe.qrule, s, X, true)
         du = s.dN * view(fe.U,1,eltj)
         fx =  view(fe.F,1,eltj)' * s.N
         Re[:] += (s.dN'*du - s.N*fx) * wt

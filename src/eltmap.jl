@@ -1,6 +1,7 @@
 using LinearAlgebra
 
-##ldoc on
+#ldoc on
+##
 # # Mapped subdomains
 #
 # Our shape functions and quadrature rules are defined on simple
@@ -9,7 +10,7 @@ using LinearAlgebra
 # from a reference domain $\Omega_0$ into a spatial domain $\Omega_e$
 # (with $\chi(\Omega_0) = \Omega_e$).  We will typically write
 # $x = \chi(X)$ for generic points in the spatial and reference domains.
-
+#
 # ## Mapping functions and derivatives
 # 
 # With the mapping between domains in hand, We can identify functions
@@ -20,13 +21,13 @@ using LinearAlgebra
 # $$
 # and the derivative mapping is given by
 # $$
-#   (f^e)'(x) = (f^0)'(X) J(X)^{-1}
+#   {f^e}'(x) = {f^0}'(X) J(X)^{-1}
 # $$
 # where $J(X) = \partial \chi/\partial X$ is the Jacobian of the
 # reference-to-spatial mapping.  In terms of gradients, we can
 # write this as
 # $$
-#   \nabla_x f_e(x) = J(X)^{-T} \nabla_X f^0(X).
+#   \nabla_x f^e(x) = J(X)^{-T} \, \nabla_X f^0(X).
 # $$
 #
 # Because we expect to be computing these types of transformations
@@ -55,6 +56,7 @@ function r2s_det(J, ipiv)
     detJ
 end
 
+##
 # ## Mapped quadrature
 #
 # We can also express integrals over $\Omega_e$ in terms of integrals
@@ -63,7 +65,7 @@ end
 #   \int_{\Omega_e} f^e(x) \, dx =
 #   \int_{\Omega_0} f^0(X) |\det J(X)| \, dX.
 # $$
-# We will generally assume that $\chi$ is *positively-oriented*, i.e.
+# We will generally assume that $\chi$ is *positively-oriented*, that is,
 # $\det J$ is positive over all points within $\Omega_0$.  Under this
 # assumption, we can convert quadrature rules over the reference domain
 # to mapped quadrature rules:
@@ -105,6 +107,7 @@ function quad_weight(q :: MappedRule, i; map = false)
     quad_weight(q.base_rule, i) * r2s_det(q.J, q.ipiv)
 end
 
+##
 # ## Iso-parametric mapping
 #
 # In some cases, the mapping function $\chi$ may be hand-crafted.
@@ -116,7 +119,7 @@ end
 # where $x_i$ are given nodal locations.  In this case, the Jacobian of
 # the map is
 # $$
-#   \chi'(X) = \sum_{i=1}^m x_i N^e_i'(X).
+#   \chi'(X) = \sum_{i=1}^m x_i {N^e_i}'(X).
 # $$
 # When the same shape functions are used for defining the domain mapping
 # and the interpolation of solution fields on the domain, we say we are
@@ -132,13 +135,13 @@ end
 ##
 # It is useful to also define an isoparametric quadrature rule
 
-struct IsoMappedRule{T,S,M} <: QuadratureRule \
-    where {T <: QuadratureRule, S <: ShapeFuns, M <: AbstractMatrix}
-
+struct IsoMappedRule{T <: QuadratureRule,
+                     S <: ShapeFuns,
+                     M <: AbstractMatrix} <: QuadratureRule
     base_rule :: T                # Reference domain rule
     shapes    :: S                # Shapes
     xnodal    :: M                # Nodal points
-    map_grads :: Boolean          # Flag whether to map gradients
+    map_grads :: Bool             # Flag whether to map gradients
     J         :: Matrix{Float64}  # Space for Jacobian/LU
     ipiv      :: Vector{Int}      # Pivots for Jacobian LU
 end
@@ -156,13 +159,13 @@ quad_dim(q :: IsoMappedRule) = quad_dim(q.base_rule)
 function quad_point(q :: IsoMappedRule, i)
     x = quad_point(q.base_rule, i)
     isoparametric!(q.shapes, q.xnodal, x, q.J)
-    r2s_factor!(q.J, ipiv)
+    r2s_factor!(q.J, q.ipiv)
     if q.map_grads r2s_gradients!(q, q.shapes) end
     x
 end
 
 function quad_weight(q :: IsoMappedRule, i; map = false)
     if map quad_point(q, i) end
-    quad_weight(q.base_rule, i) * r2s_det(q.J, q.ipiv)    
+    quad_weight(q.base_rule, i) * r2s_det(q.J, q.ipiv)
 end
 
